@@ -1,49 +1,138 @@
 package com.ipalacios;
 
-import com.ipalacios.binominalexpansion.KataSolution;
-import com.ipalacios.eqsystem.EqSystem;
+import com.ipalacios.linesafari.Dinglemouse;
+
 import org.junit.Test;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class SolutionTest {
 
+    // "Good" examples from the Kata description.
+
+    private char[][] makeGrid(String[] in) {
+        char[][] out = new char[in.length][];
+
+        for (int i = 0; i < in.length; i++) {
+            out[i] = in[i].toCharArray();
+        }
+
+        return out;
+    }
+
+
     @Test
-    public void testBPositive() {
-        assertEquals("1", KataSolution.expand("(x+1)^0"));
-        assertEquals("x+1", KataSolution.expand("(x+1)^1"));
-        assertEquals("x^2+2x+1", KataSolution.expand("(x+1)^2"));
+    public void exGood1() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "           ",
+                "X---------X",
+                "           ",
+                "           "
+        });
+        assertEquals(true, Dinglemouse.line(grid));
     }
 
     @Test
-    public void testBNegative() {
-        assertEquals("1", KataSolution.expand("(x-1)^0"));
-        assertEquals("x-1", KataSolution.expand("(x-1)^1"));
-        assertEquals("x^2-2x+1", KataSolution.expand("(x-1)^2"));
+    public void exGood2() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "     ",
+                "  X  ",
+                "  |  ",
+                "  |  ",
+                "  X  "
+        });
+        assertEquals(true, Dinglemouse.line(grid));
     }
 
     @Test
-    public void testAPositive() {
-        assertEquals("625m^4+1500m^3+1350m^2+540m+81", KataSolution.expand("(5m+3)^4"));
-        assertEquals("8x^3-36x^2+54x-27", KataSolution.expand("(2x-3)^3"));
-        assertEquals("1", KataSolution.expand("(7x-7)^0"));
-        assertEquals("81t^2", KataSolution.expand("(9t-0)^2"));
+    public void exGood3() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "                    ",
+                "     +--------+     ",
+                "  X--+        +--+  ",
+                "                 |  ",
+                "                 X  ",
+                "                    "
+        });
+        assertEquals(true, Dinglemouse.line(grid));
     }
 
     @Test
-    public void testANegative() {
-        assertEquals("625m^4-1500m^3+1350m^2-540m+81", KataSolution.expand("(-5m+3)^4"));
-        assertEquals("-8k^3-36k^2-54k-27", KataSolution.expand("(-2k-3)^3"));
-        assertEquals("1", KataSolution.expand("(-7x-7)^0"));
-        assertEquals("-n^5-60n^4-1440n^3-17280n^2-103680n-248832", KataSolution.expand("(-n-12)^5"));
+    public void exGood4() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "                     ",
+                "    +-------------+  ",
+                "    |             |  ",
+                " X--+      X------+  ",
+                "                     "
+        });
+        assertEquals(true, Dinglemouse.line(grid));
     }
 
     @Test
-    public void randomTest() {
-        assertEquals("282475249j^10+3228288560j^9+16602626880j^8+50598481920j^7+101196963840j^6+138784407552j^5+132175626240j^4+86318776320j^3+36993761280j^2+9395240960j+1073741824", KataSolution.expand("(-7j-8)^10"));
+    public void exGood5() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "                      ",
+                "   +-------+          ",
+                "   |      +++---+     ",
+                "X--+      +-+   X      "
+        });
+        assertEquals(true, Dinglemouse.line(grid));
     }
 
+    // "Bad" examples from the Kata description.
+
+    @Test
+    public void exBad1() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "X-----|----X"
+        });
+        assertEquals(false, Dinglemouse.line(grid));
+    }
+
+    @Test
+    public void exBad2() {
+        final char grid[][] = this.makeGrid(new String[]{
+                " X  ",
+                " |  ",
+                " +  ",
+                " X  "
+        });
+        assertEquals(false, Dinglemouse.line(grid));
+    }
+
+    @Test
+    public void exBad3() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "   |--------+    ",
+                "X---        ---+ ",
+                "               | ",
+                "               X "
+        });
+        assertEquals(false, Dinglemouse.line(grid));
+    }
+
+    @Test
+    public void exBad4() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "              ",
+                "   +------    ",
+                "   |          ",
+                "X--+      X   ",
+                "              "
+        });
+        assertEquals(false, Dinglemouse.line(grid));
+    }
+
+    @Test
+    public void exBad5() {
+        final char grid[][] = this.makeGrid(new String[]{
+                "      +------+",
+                "      |      |",
+                "X-----+------+",
+                "      |       ",
+                "      X       ",
+        });
+        assertEquals(false, Dinglemouse.line(grid));
+    }
 
 }
