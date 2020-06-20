@@ -1,7 +1,5 @@
 package com.ipalacios.binominalexpansion;
 
-import java.util.function.BinaryOperator;
-
 // Binomial expansion
 // https://www.codewars.com/kata/540d0fdd3b6532e5c3000b5b/train/java
 public class KataSolution {
@@ -17,8 +15,11 @@ public class KataSolution {
 
             String[] splitted = expression.split("\\^");
             this.n = Integer.valueOf(splitted[1]).intValue();
+
             String binomial = splitted[0].replaceAll("[(,)]","");
             int index = 0;
+
+            // Optional sign
             if (binomial.charAt(index) == '+') {
                 index++;
             }
@@ -27,16 +28,18 @@ public class KataSolution {
                 index++;
             }
 
-            String coeficientStr = "";
+            // Coefficient 'a'
+            String coefficientStr = "";
             while(String.valueOf(binomial.charAt(index)).matches("[0-9]")) {
-                coeficientStr += binomial.charAt(index);
+                coefficientStr += binomial.charAt(index);
                 index++;
             }
-            if (!coeficientStr.isEmpty()) {
-                this.a *= Integer.valueOf(coeficientStr).intValue();
+            if (!coefficientStr.isEmpty()) {
+                this.a *= Integer.valueOf(coefficientStr).intValue();
             }
             this.variable += binomial.charAt(index++);
 
+            // Mandatory sing
             if (binomial.charAt(index) == '+') {
                 index++;
             }
@@ -44,12 +47,14 @@ public class KataSolution {
                 this.b *= -1;
                 index++;
             }
-            coeficientStr = "";
+
+            // Coefficient 'b'
+            coefficientStr = "";
             while(index < binomial.length() && String.valueOf(binomial.charAt(index)).matches("[0-9]")) {
-                coeficientStr += binomial.charAt(index);
+                coefficientStr += binomial.charAt(index);
                 index++;
             }
-            this.b *= Integer.valueOf(coeficientStr).intValue();
+            this.b *= Integer.valueOf(coefficientStr).intValue();
         }
 
         public Binomial compute() {
@@ -57,7 +62,7 @@ public class KataSolution {
 
             for (int i = 0; i <= n; i++) {
                 this.values[i] = (long)Math.pow(a, n - i) * (long)Math.pow(b, i);
-                this.values[i] *= triangle(n, i);
+                this.values[i] *= getCoefficient(n, i);
             }
             return this;
         }
@@ -90,11 +95,15 @@ public class KataSolution {
             return str.toString();
         }
 
-        private int triangle (int n, int k) {
+        /**
+         * Pascal triangle coefficient calculation
+         * https://en.wikipedia.org/wiki/Pascal%27s_triangle
+         */
+        private int getCoefficient(int n, int k) {
             if (k == 0 || k == n) {
                 return 1;
             }
-            return triangle(n - 1 , k - 1) + triangle (n -1, k);
+            return getCoefficient(n - 1 , k - 1) + getCoefficient(n -1, k);
         }
 
     }
