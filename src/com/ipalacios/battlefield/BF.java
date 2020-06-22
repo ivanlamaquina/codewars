@@ -1,4 +1,4 @@
-package com.ipalacios;
+package com.ipalacios.battlefield;
 
 import java.util.Arrays;
 
