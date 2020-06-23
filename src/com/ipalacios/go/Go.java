@@ -3,6 +3,7 @@ package com.ipalacios.go;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 // Game of Go
 // https://www.codewars.com/kata/59de9f8ff703c4891900005c/train/java
@@ -12,10 +13,16 @@ public class Go {
     private static final char WHITE = 'o';
     private static final char BLANK = '.';
 
+    private Stack<Go> historial = new Stack<>();
+
+
     private int numRows, numCols;
     private char[][] board;
     private char currentTurn = BLACK;
 
+    public Go() {
+        super();
+    }
 
     public Go(int n) {
         this(n, n);
@@ -29,10 +36,16 @@ public class Go {
         this.numCols = width;
         this.board = new char[numRows][numCols];
         this.reset();
+
+        this.save();
     }
 
     public char[][] getBoard() {
         return this.board;
+    }
+
+    public void setBoard(char[][] board) {
+        this.board = board;
     }
 
     public void move(String move) {
@@ -94,7 +107,6 @@ public class Go {
     }
 
     public void passTurn() {
-
         this.currentTurn = this.currentTurn == WHITE ? BLACK : WHITE;
     }
 
@@ -106,7 +118,12 @@ public class Go {
     }
 
     public void rollBack(int num) {
-
+        Go back = null;
+        for (int i = 0; i < num && !this.historial.empty(); i++) {
+            back = this.historial.pop();
+        }
+        this.setBoard(copyBoard(back.board));
+        this.currentTurn = back.currentTurn;
     }
 
 
@@ -130,5 +147,21 @@ public class Go {
             throw new IllegalArgumentException();
         }
         return coords;
+    }
+
+    private void save() {
+        Go stage = new Go();
+        stage.setBoard(copyBoard(this.board));
+        stage.currentTurn = this.currentTurn;
+        this.historial.push(stage);
+    }
+
+    public char[][] copyBoard(char[][] board) {
+        char[][] copy = new char[board.length][board[0].length];
+        for (int i = 0; i < numRows; i++) {
+            copy[i] = Arrays.copyOf(board[i], board[i].length);
+        }
+        return copy;
+
     }
 }
