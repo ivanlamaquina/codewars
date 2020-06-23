@@ -1,8 +1,12 @@
 package com.ipalacios;
 
-import com.ipalacios.linesafari.Dinglemouse;
+import com.ipalacios.go.Go;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 public class SolutionTest {
 

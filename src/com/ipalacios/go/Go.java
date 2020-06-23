@@ -1,6 +1,8 @@
 package com.ipalacios.go;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 // Game of Go
 // https://www.codewars.com/kata/59de9f8ff703c4891900005c/train/java
@@ -8,6 +10,7 @@ public class Go {
 
     private static final char BLACK = 'x';
     private static final char WHITE = 'o';
+    private static final char BLANK = '.';
 
     private int numRows, numCols;
     private char[][] board;
@@ -19,24 +22,68 @@ public class Go {
     }
 
     public Go(int height, int width) {
+        if (height <= 0 || width <= 0 || height >= 32 || width >= 32) {
+            throw new IllegalArgumentException();
+        }
         this.numRows = height;
         this.numCols = width;
         this.board = new char[numRows][numCols];
-
+        this.reset();
     }
 
     public char[][] getBoard() {
         return this.board;
     }
 
-    public void move(String move) throws IllegalArgumentException {
+    public void move(String move) {
+        int[] pos = parseCoords(move);
 
+        if (this.board[pos[0]][pos[1]] != BLANK) {
+            throw new IllegalArgumentException();
+        }
+        this.board[pos[0]][pos[1]] = this.currentTurn == BLACK ? BLACK : WHITE;
+        passTurn();
+    }
+
+    public void move(String[] moves) throws IllegalArgumentException {
+        for (String move : moves) {
+            move(move);
+        }
+    }
+
+    public void move(String move, String... moves) {
+        this.move(move);
+        this.move(moves);
+    }
+
+    public Map<String, Integer> getSize() {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("height", this.numRows);
+        map.put("width", this.numCols);
+        return map;
+    }
+
+    public char getPosition(String coord) {
+        int[] pos = parseCoords(coord);
+        return this.board[pos[0]][pos[1]];
     }
 
     public void handicapStones(int num) throws IllegalArgumentException {
-        if (numCols != numRows && numRows != 9 && numRows != 13 && numRows != 19)) {
+        if (this.numRows != 9 && this.numRows != 13 && this.numRows != 19) {
             throw new IllegalArgumentException();
         }
+        int[][] handicap = null;
+        if (this.numRows == 9) {
+            handicap = new int[][]{{2, 6}, {6, 2}, {6, 6}, {2, 2}, {4, 4}};
+        } else if (this.numRows == 13) {
+            handicap = new int[][]{{3, 9}, {9, 3}, {9, 9}, {3, 3}, {6, 6}, {6, 3}, {6, 9}, {3, 6}, {9, 6}};
+        } else if (this.numRows == 19) {
+            handicap = new int[][]{{3, 15}, {15, 3}, {15, 15}, {3, 3}, {9, 9}, {9, 3}, {9, 15}, {3, 9}, {15, 9}};
+        }
+        for (int i = 0; i < num;  i++) {
+            this.board[handicap[i][0]][handicap[i][1]] = BLACK;
+        }
+
     }
 
     public String getTurn() {
@@ -54,8 +101,34 @@ public class Go {
     public void reset() {
         this.currentTurn = BLACK;
         for (int i = 0; i < numRows; i++) {
-            Arrays.fill(this.board[i], '.');
+            Arrays.fill(this.board[i], BLANK);
         }
     }
 
+    public void rollBack(int num) {
+
+    }
+
+
+    private int[] parseCoords(String strCoords) {
+        int[] coords = new int[2];
+        int index = 0;
+        while(index < strCoords.length() && String.valueOf(strCoords.charAt(index)).matches(("[0-9]"))) {
+            index++;
+        }
+        if (index == 0 || index == strCoords.length()) {
+            throw new IllegalArgumentException();
+        }
+        int row = Integer.valueOf(strCoords.substring(0, index)).intValue();
+        if (row < 0 || row > numRows ) {
+            throw new IllegalArgumentException();
+        }
+        coords[0] = numRows - row;
+        char col = strCoords.charAt(index);
+        coords[1] = (int)col < 73 ? col - 65 : col - 66;
+        if (coords[1] < 0 || coords[1] > numCols) {
+            throw new IllegalArgumentException();
+        }
+        return coords;
+    }
 }
