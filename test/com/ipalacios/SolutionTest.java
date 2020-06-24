@@ -315,4 +315,30 @@ public class SolutionTest {
         assertEquals("black", g.getTurn());
     }
 
+    @Test
+    public void test_TurnShouldBeWhiteAfter_pass_move_rollBack() {
+        Go g = new Go(4);
+        g.move("1A");
+        try {
+            g.move("1A");
+        } catch (IllegalArgumentException e) {
+            assertEquals("white", g.getTurn());
+        }
+    }
+
+    @Test
+    public void test_HandicapStones_FailIfNotAtTheBeginning() {
+        Go g = new Go(9);
+        g.reset();
+        g.passTurn();
+        g.passTurn();
+        try {
+            g.handicapStones(3);
+            fail("Expected IllegalArgumentException");
+        } catch(IllegalArgumentException e) {
+        } catch(RuntimeException e) {
+            fail("Expected IllegalArgumentException");
+        }
+    }
+
 }
