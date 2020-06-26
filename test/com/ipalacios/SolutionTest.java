@@ -340,5 +340,4 @@ public class SolutionTest {
             fail("Expected IllegalArgumentException");
         }
     }
-
 }

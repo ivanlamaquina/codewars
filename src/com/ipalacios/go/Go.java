@@ -14,8 +14,6 @@ public class Go {
     private static final char BLANK = '.';
 
     private Stack<Go> historial = new Stack<>();
-
-
     private int numRows, numCols;
     private char[][] board;
     private char currentTurn = BLACK;
@@ -30,8 +28,7 @@ public class Go {
     }
 
     public Go(int height, int width) {
-        System.out.println("Go(" + height + ", " + height + ")");
-        if (height <= 0 || width <= 0 || width >= 32) {
+        if (height <= 0 || width <= 0 || width >= 25) {
             throw new IllegalArgumentException();
         }
         this.numRows = height;
@@ -41,7 +38,6 @@ public class Go {
     }
 
     public char[][] getBoard() {
-        System.out.println("getBoard()");
         return this.board;
     }
 
@@ -49,12 +45,16 @@ public class Go {
         this.board = board;
     }
 
+    public void move(String... moves) {
+        for (String move : moves) {
+            this.move(move);
+        }
+    }
+
     public void move(String move) {
-        System.out.println("move(" + move + ")");
         int[] pos = parseCoords(move);
         int x = pos[0];
         int y = pos[1];
-
 
         if (this.board[x][y] != BLANK) {
             throw new IllegalArgumentException();
@@ -64,40 +64,97 @@ public class Go {
 
         this.board[x][y] = this.currentTurn;
         capture(x, y, this.currentTurn);
-        System.out.println("Move: " + move);
-        printBoard();
-
 
         if (isCaptured(x, y, this.currentTurn, null)) {
-            this.rollBack(3);
+            this.rollBack(1);
             throw new IllegalArgumentException();
         }
-        passTurn();
+        changeTurn();
         if (isKo()) {
             this.rollBack(1);
             throw new IllegalArgumentException();
         }
     }
 
+    public Map<String, Integer> getSize() {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("height", this.numRows);
+        map.put("width", this.numCols);
+        return map;
+    }
+
+    public char getPosition(String coord) {
+        int[] pos = parseCoords(coord);
+        return this.board[pos[0]][pos[1]];
+    }
+
+    public void handicapStones(int num) throws IllegalArgumentException {
+        if ((this.numRows != 9 && this.numRows != 13 && this.numRows != 19) || !this.historial.empty()) {
+            throw new IllegalArgumentException();
+        }
+        int[][] handicap = null;
+        if (this.numRows == 9) {
+            handicap = new int[][]{{2, 6}, {6, 2}, {6, 6}, {2, 2}, {4, 4}};
+        } else if (this.numRows == 13) {
+            handicap = new int[][]{{3, 9}, {9, 3}, {9, 9}, {3, 3}, {6, 6}, {6, 3}, {6, 9}, {3, 6}, {9, 6}};
+        } else if (this.numRows == 19) {
+            handicap = new int[][]{{3, 15}, {15, 3}, {15, 15}, {3, 3}, {9, 9}, {9, 3}, {9, 15}, {3, 9}, {15, 9}};
+        }
+        if (num > handicap.length) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = 0; i < num;  i++) {
+            if (this.board[handicap[i][0]][handicap[i][1]] != BLANK) {
+                throw new IllegalArgumentException();
+            }
+            this.board[handicap[i][0]][handicap[i][1]] = BLACK;
+        }
+    }
+
+    public String getTurn() {
+        if (currentTurn == WHITE) {
+            return "white";
+        }
+        return "black";
+    }
+
+    public void passTurn() {
+        save();
+        changeTurn();
+    }
+
+    public void reset() {
+        this.historial.clear();
+        this.gameStarted = false;
+        this.currentTurn = BLACK;
+        for (int i = 0; i < numRows; i++) {
+            Arrays.fill(this.board[i], BLANK);
+        }
+    }
+
+    public void rollBack(int num) {
+        if (num > this.historial.size()) {
+            throw new IllegalArgumentException();
+        }
+        Go back = null;
+        for (int i = 0; i < num && !this.historial.empty(); i++) {
+            back = this.historial.pop();
+        }
+        this.setBoard(back.board);
+        this.currentTurn = back.currentTurn;
+    }
+
     private boolean isKo() {
         if (historial.size() < 2) {
             return false;
         }
-        Go skipped = this.historial.pop();
-        Go old = this.historial.pop();
-        boolean equals = true;
-
+        Go old = this.historial.elementAt(this.historial.size() - 2);
         for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < numCols && equals == true; j++) {
-                if (this.board[i][j] != old.board[i][j]) {
-                    equals = false;
-                }
+            if (!Arrays.equals(this.board[i], old.board[i])) {
+                return false;
             }
         }
-
-        this.historial.push(old);
-        this.historial.push(skipped);
-        return equals;
+        return true;
     }
 
     private void capture(int x, int y, char color) {
@@ -124,93 +181,9 @@ public class Go {
         }
     }
 
-    public void move(String[] moves) throws IllegalArgumentException {
-        for (String move : moves) {
-            move(move);
-        }
-    }
-
-    public void move(String move, String... moves) {
-        this.move(move);
-        this.move(moves);
-    }
-
-    public Map<String, Integer> getSize() {
-        System.out.println("getSize()");
-        Map<String, Integer> map = new HashMap<>();
-        map.put("height", this.numRows);
-        map.put("width", this.numCols);
-        return map;
-    }
-
-    public char getPosition(String coord) {
-        System.out.println("getPosition(" + coord + ")");
-        int[] pos = parseCoords(coord);
-        return this.board[pos[0]][pos[1]];
-    }
-
-    public void handicapStones(int num) throws IllegalArgumentException {
-        System.out.println("handicapStones(" + num + ")");
-        if ((this.numRows != 9 && this.numRows != 13 && this.numRows != 19) || this.gameStarted) {
-            throw new IllegalArgumentException();
-        }
-        int[][] handicap = null;
-        if (this.numRows == 9) {
-            handicap = new int[][]{{2, 6}, {6, 2}, {6, 6}, {2, 2}, {4, 4}};
-        } else if (this.numRows == 13) {
-            handicap = new int[][]{{3, 9}, {9, 3}, {9, 9}, {3, 3}, {6, 6}, {6, 3}, {6, 9}, {3, 6}, {9, 6}};
-        } else if (this.numRows == 19) {
-            handicap = new int[][]{{3, 15}, {15, 3}, {15, 15}, {3, 3}, {9, 9}, {9, 3}, {9, 15}, {3, 9}, {15, 9}};
-        }
-        if (num > handicap.length) {
-            throw new IllegalArgumentException();
-        }
-        for (int i = 0; i < num;  i++) {
-            if (this.board[handicap[i][0]][handicap[i][1]] != BLANK) {
-                throw new IllegalArgumentException();
-            }
-            this.board[handicap[i][0]][handicap[i][1]] = BLACK;
-        }
-
-    }
-
-    public String getTurn() {
-        System.out.println("getTurn()");
-        if (currentTurn == WHITE) {
-            return "white";
-        }
-        return "black";
-    }
-
-    public void passTurn() {
-        this.gameStarted = true;
-        System.out.println("passTurn()");
+    private void changeTurn() {
         this.currentTurn = this.currentTurn == WHITE ? BLACK : WHITE;
     }
-
-    public void reset() {
-        System.out.println("reset()");
-        this.historial.clear();
-        this.gameStarted = false;
-        this.currentTurn = BLACK;
-        for (int i = 0; i < numRows; i++) {
-            Arrays.fill(this.board[i], BLANK);
-        }
-    }
-
-    public void rollBack(int num) {
-        System.out.println("rollBack(" + num + ")");
-        if (num > this.historial.size()) {
-            throw new IllegalArgumentException();
-        }
-        Go back = null;
-        for (int i = 0; i < num && !this.historial.empty(); i++) {
-            back = this.historial.pop();
-        }
-        this.setBoard(back.board);
-        this.currentTurn = back.currentTurn;
-    }
-
 
     private int[] parseCoords(String strCoords) {
         int[] coords = new int[2];
@@ -236,15 +209,15 @@ public class Go {
 
     private void save() {
         Go stage = new Go();
-        stage.setBoard(copyBoard(this.board));
+        stage.setBoard(copyBoard());
         stage.currentTurn = this.currentTurn;
         this.historial.push(stage);
     }
 
-    private char[][] copyBoard(char[][] board) {
-        char[][] copy = new char[board.length][board[0].length];
+    private char[][] copyBoard() {
+        char[][] copy = new char[this.board.length][this.board[0].length];
         for (int i = 0; i < numRows; i++) {
-            copy[i] = Arrays.copyOf(board[i], board[i].length);
+            copy[i] = Arrays.copyOf(this.board[i], this.board[i].length);
         }
         return copy;
 
@@ -271,9 +244,9 @@ public class Go {
         }
         visited[x][y] = value;
 
-        char top = x - 1 > 0 ? board[x - 1][y] : notColor;
+        char top = x - 1 >= 0 ? board[x - 1][y] : notColor;
         char bottom = x + 1 < this.numRows ? this.board[x + 1][y] : notColor;
-        char left = y - 1> 0 ? this.board[x][y - 1] : notColor;
+        char left = y - 1 >= 0 ? this.board[x][y - 1] : notColor;
         char right = y + 1 < numCols ? this.board[x][y + 1] : notColor;
 
         if (top == BLANK || bottom == BLANK || right == BLANK || left == BLANK) {
@@ -305,7 +278,7 @@ public class Go {
         }
     }
 
-    private void printBoard() {
+    public void printBoard() {
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
                 System.out.print(board[i][j]);
