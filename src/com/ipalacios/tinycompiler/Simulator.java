@@ -1,4 +1,4 @@
-package com.ipalacios;
+package com.ipalacios.tinycompiler;
 
 import java.util.Deque;
 import java.util.LinkedList;
