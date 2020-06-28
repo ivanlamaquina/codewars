@@ -3,6 +3,7 @@ package com.ipalacios.mathevaluator;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
+
 public class MathEvaluatorTest {
     @Test public void testAddition() {
         assertEquals(new MathEvaluator().calculate("1+1"), 2d, 0.01);
@@ -39,4 +40,23 @@ public class MathEvaluatorTest {
     @Test public void testComplex() {
         assertEquals(new MathEvaluator().calculate("2 / (2 + 3) * 4.33 - -6"), 7.732, 0.01);
     }
+
+    @Test public void test1() {
+        assertEquals(new MathEvaluator().calculate("12* 123/-(-5 + 2)"), 492, 0.01);
+    }
+    @Test public void test2() {
+        assertEquals(new MathEvaluator().calculate("(1 - 2) + -(-(-(-4)))"), 3.0, 0.01);
+    }
+    @Test public void test3() {
+        assertEquals(new MathEvaluator().calculate("(123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) - (123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) + (13 - 2)/ -(-11)"), 1.0, 0.01);
+    }
+    @Test public void test5() {
+        assertEquals(new MathEvaluator().calculate("(10) - (10) + (10)/ -(-10)"), 1.0, 0.01);
+    }
+   @Test public void test4() {
+        assertEquals(new MathEvaluator().calculate("123.45*(678.90 / (-2.5+ 11.5)-(80 -19) *33.25) / 20 + 11"), -12042.760875, 0.01);
+    }
+
+
+
 }
